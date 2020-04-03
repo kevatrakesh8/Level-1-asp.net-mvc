@@ -1,0 +1,36 @@
+// create table queries 
+
+ 	use[Test]
+	go
+	create table dbo.country
+	(
+	country_id int not null identity (1,1) primary key,
+	country_name varchar(100)
+	);
+	create table dbo.state
+	(
+	state_id int not null identity(1,1) primary key,
+	state_name varchar(100)
+	country_id int
+	);
+
+	create table dbo.city
+	(
+	city_id int not null identity(1,1) primary key,
+	city_name varchar(100)
+	state_id int
+	);
+
+// Drop table queries 
+
+	drop table dbo.country
+	drop table dbo.state	
+
+
+// Select statement 
+	select * from state 
+	select * from country 
+
+// alter table (add heading )
+              alter table state add country_id int
+              alter table city add state_id int

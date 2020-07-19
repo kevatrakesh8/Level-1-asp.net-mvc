@@ -1,0 +1,249 @@
+https://dotnettutorials.net/lesson/textbox-html-helper-mvc/
+Method :A method is a group of statements that together perform a task.
+        Every C# program has at least one class with a method named Main.
+
+        To use a method, you need to −
+        Define the method
+        Call the method
+@*<Access Specifier><Return Type><Method Name>(Parameter List)
+           {
+             Method Body,
+             Member,
+             function,
+             Statement
+           }
+     Prg :
+     public string MyMethod(int height)
+         {
+             var height;
+             void function(){
+             };
+         }
+    Use :
+     class Calculation
+     {
+         public int findMax(int a, int b)
+             {
+                 int result ;
+                 result = a*b;
+                 return result;
+             }
+     }
+     class Test{
+      static void main(string[]){
+         Calculation c =new Calculation();
+                 n.result(1,2);
+         }
+    }
+*@
+What is Opps :
+  OOP stands for Object-Oriented Programming.
+1.Encapsulation:
+    1.the process of enclosing one or more items within a physical or logical package'.
+    2.Encapsulation is implemented by using access specifiers. An access specifier defines the scope
+    and visibility of a class member. C# supports the following access specifiers.
+
+    Public
+    Private
+    Protected
+    Internal
+    Protected internal
+    Public Access Specifier :
+    1.Any public member and function can be accessed from "outside the class".
+    2."Public access specifier" allows a class to expose its member variables
+    and member functions to other functions and objects.
+
+    Private Access Specifier: Any private member and function can "not" be accessed from "outside the class".
+    1.Private access specifier allows a class to hide its member variables
+    and member functions from other functions and objects.
+    2.Only functions of the same class can access its private members.
+    3.Even an instance of a class cannot access its private members.
+    Protected Access Specifier: Any Protected member and function can not be accessed from outside the class and "access only child class".
+
+    Internal Access Specifier :Any Internal member and function can be accessed from only "outside the all class with in same namespace".
+    Internal access specifier allows a class to expose its member variables
+    and member functions to other functions and objects in the current assembly.
+
+2.Inheritance : it is possible to inherit fields and methods from one class to another.
+                Base Class (parent) - the class being inherited from.
+                Derived Class (child) - the class that inherits from another class.
+
+@*<acess-specifier> class <base_class>
+        {
+        ...
+        }
+
+        class <derived_class>: <base_class>
+                {
+                ...
+                }
+
+    eg. protected class animals{}
+                  class Dog : animal{}
+*@
+
+3.Polymorphism:
+   Polymorphism means "many forms".
+   This allows us to perform a single action in different ways.
+   prg :
+@*class Animal  // Base class (parent)
+        {
+          public void animalSound()
+          {
+            Console.WriteLine("The animal makes a sound");
+          }
+        }
+
+        class Pig : Animal  // Derived class (child)
+        {
+          public void animalSound()
+          {
+            Console.WriteLine("The pig says: wee wee");
+          }
+        }
+
+        class Dog : Animal  // Derived class (child)
+        {
+          public void animalSound()
+          {
+            Console.WriteLine("The dog says: bow wow");
+          }
+    }*@
+
+  method overloading: Method Overloading means creating multiple methods in a class with same names but different signatures (Parameters).
+                      It permits a class, struct, or interface to declare multiple methods with the same name with unique signatures.
+
+  method overriding: Method Overriding means having two methods with same name and same signatures [parameters],
+                     one should be in the base class and other method should be in a derived class [child class].
+                     You can achieve method overriding using inheritance. Virtual and Override keywords are used to achieve method overriding.
+
+
+4.Abstraction : it is the process of hiding certain details and showing only essential information to the user.
+@*abstract class Animal
+      {
+        public abstract void animalSound();
+        public void sleep()
+        {
+          Console.WriteLine("Zzz");
+        }
+    }
+*@
+
+Interface :An interface is a completely "abstract class",
+           which can only contain abstract methods and properties (with empty bodies):
+@*// interface
+    interface Animal
+    {
+      void animalSound(); // interface method (does not have a body)
+      void run(); // interface method (does not have a body)
+    }*@
+
+
+Static : You cannot create an object of a static class and cannot access static members using an object.
+        >>Rules for Static Class
+        1.Static classes cannot be instantiated.
+        2.All the members of a static class must be static;
+            otherwise the compiler will give an error.
+        3.A static class can contain static variables, static methods, static properties,
+            static operators, static events, and static constructors.
+
+serialization : The process of converting an object into a stream of bytes is called Serialization
+
+
+ReadOnly : we can declare outside the controller but must have to intilized in the cunstructor.
+                Must have set value, by the time constructor Blog.
+                const fields has to be initialized while declaration only,
+                while readonly fields can be initialized at declaration or in the constructor.
+@* // C# program to illustrate the use
+    // of the readonly keyword
+    using System;
+
+    class GFG {
+
+        // readonly variables
+        public readonly int myvar1;
+        public readonly int myvar2;
+
+        // Values of the readonly
+        // variables are assigned
+        // Using constructor
+        public GFG(int b, int c)
+        {
+
+            myvar1 = b;
+            myvar2 = c;
+            Console.WriteLine("Display value of myvar1 {0}, "+
+                            "and myvar2 {1}", myvar1, myvar2);
+        }
+
+        // Main method
+        static public void Main()
+        {
+            GFG obj1 = new GFG(100, 200);
+        }
+    }  *@
+
+Constant : we no need to intialised the value in controller. we can declare outsied the cunstructor method. Code
+
+@* // C# program to illustrate the
+    // use of const keyword
+    using System;
+
+    class GFG {
+
+        // Constant fields
+        public const int myvar = 10;
+        public const string str = "GeeksforGeeks";
+
+        // Main method
+        static public void Main()
+        {
+
+            // Display the value of Constant fields
+            Console.WriteLine("The value of myvar: {0}", myvar);
+            Console.WriteLine("The value of str: {0}", str);
+        }
+    }  *@
+
+  sealed classes : We create sealed classes when we want to restrict the class to be inherited. Avoid class of inheritate.
+
+  //====================================================================================================================================================
+C# MvC
+
+
+1.Types of Action
+ContentResult
+FileContentResult
+FilePathResult
+JavaScriptResult
+JsonResult
+RedirectToResult
+ViewResult
+PartialViewResult
+
+
+2.Types of Filters
+The ASP.NET MVC framework supports four different types of filters −
+
+Authorization Filters − Implements the IAuthorizationFilter attribute.
+
+Action Filters − Implements the IActionFilter attribute.
+
+Result Filters − Implements the IResultFilter attribute.
+
+Exception Filters − Implements the IExceptionFilter attribute.
+
+
+3. Selectors
+   3.1 ActionName
+   3.2 NonAction : notwork that controller.
+   3.3 ActionVerbs
+        HttpGet
+        HttpPost
+        HttpPut
+        HttpDelete
+        HttpOptions
+        HttpPatch
+
+validator : check whether the user input is valid.
+            [StringLength(60, MinimumLength = 3)]

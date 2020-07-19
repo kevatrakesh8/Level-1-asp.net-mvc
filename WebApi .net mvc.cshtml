@@ -1,0 +1,289 @@
+1.Doing Curd Using Web Api application
+2.What do you means by CUrd
+3.Mapping Curd operation with Web Api Method Operation.
+4.Create - Post
+5. Read- Get
+6. Update - Put
+7. Delete - Delete
+
+1.1 Create - Post - Need to the post the method.
+1.2 Read  - Get - The Model
+1.3 Update - post the Model Or Record Key
+1.4 Delete - post the Model Or Record Key
+
+Creating a WEBAPI Application
+> In this video we are going to create a Web Api Application and do the following.
+> Create an Entity Framwork  project with EDM
+> Define the Table Employee in Sql Server database.
+> Create Business Layer Project.
+> Call Your EF Data object from business layer and from Api
+> And DO CRUD operation on employee table.
+
+
+ Database :
+
+ database name :
+
+ Folder Structure
+
+ 1. Main Project :  WebApiTest : This is our main project :
+
+2. Sub Project View Model  :  EmployeeVM : Class Library (.net Framwrok),
+                              {Employee Class }
+
+3. Data Acess object :    EmployeeDAO(Entity){EmployeeModel}
+
+4. Business Logic(interface) : EmployeeBL
+
+
+Code : --------------------------------------------------------------------------------
+
+2.  >>>>>>>>
+    SubMain Project> Employee >
+    namespace EmployeeVm (SubProject Name )
+        Public class Employee
+        {
+            Public string EmployeeName {get; Set;}
+            public string EmployeeCode{get; set;}
+            public sting Salary{get; set;}
+        }
+
+1. >>>>>>>>>
+    Main project > WebApiTest>ValuesController
+
+    pubilc class value controller : Api Controllers
+
+    1.        // For Single Employee data print
+            // Get api/values
+                Public Employee Get()
+                {
+                    return new Employee {EmployeeName ="Rakesh", EmployeeCode ="10002", Salary = "25000"};
+                }
+
+    2.       // OR For Multiple Employee data print
+            // Get api/values
+                public IList<Employee> Get()
+                {
+                    Ilist<Employee> EmpList = new list<Employee>();
+                    Employee FirstEmployee = new Employee = new Employee {Employee = "Abc", Employee = "001", Salary = "4500"}
+                    Employee SecondEmployee = new Employee = new Employee {Employee = "xyz", Employee = "002", Salary = "5500"}
+
+                    EmpList.Add(FirstEmployee);
+                    EmpList.Add(SecondEmployee);
+
+                    return EmpList;
+                }
+
+    3.      // OR For Multiple Employee data print  by id
+            // Get api/values?"001"
+                public IList<Employee> Get(string id)
+                {
+                    Ilist<Employee> EmpList = new list<Employee>();
+                    Employee FirstEmployee = new Employee = new Employee {Employee = "Abc", Employee = "001", Salary = "4500"}
+                    Employee SecondEmployee = new Employee = new Employee {Employee = "xyz", Employee = "002", Salary = "5500"}
+
+                    EmpList.Add(FirstEmployee);
+                    EmpList.Add(SecondEmployee);
+
+                    return EmpList;
+                }
+
+3.  EmployeeDAO(DbEntityFramework)
+
+    public partial class EmployeeEntities : DbContext
+    {
+        public EmployeeEntities()
+               :base("name=EmployeeEntities")
+               {
+               }
+
+        public DbSet<Employee> EMPLOYEEs {get; set;}
+    }
+
+4. EmployeeBL(Business logic interface)
+
+    namespace EmployeeBL
+    {
+        public interface IEmployeeBl
+        {
+            IList<Employee> GetEmployeeList();
+            IList<Employee> GetEmployeeById(int id);
+                      void  AddEmployee(Employee employee)
+                      void  UpdateEmployee(Employee employee)
+                      void  DeleteEmployee(int id)
+        }
+
+
+
+
+        public class EmployeeBL : IEmployeeBL
+        {
+            DbContext dbContext = new EmployeeEntity();
+
+            public void AddEmployee(Employee employee)
+            {
+                using(var dbContext= new EmployeeEntities())
+                {
+                    Employee empNew = new EMPLOYEE();
+                    empNew.EmployeeName = employee.EmployeeName;
+                    empNew.EmployeeId = employee.EmployeeCode;
+                    empNew.Salary = employee.Salary;
+                    dbContext.SaveChanges();
+
+                    var Employee = dbContext.Set<Employee>();
+                    Employee.Add(empNew);
+                    dbContext.SaveChanges();
+                }
+            }
+
+            public void DeleteEmployee(int id)
+            {
+                using(var dbContext= new EmployeeEntities())
+                {
+                    Employee empDelete = dbContext.EMPLOYEEs.Where(x=>x.EmployeeId == ID).SingleOrDefault();
+                    dbContext.EMPLOYEEs.Remove(empDelete);
+                    dbContext.SaveChanges();
+                }
+            }
+
+            public IList<Employee> GetEmployeeById(int id)
+            {
+                using(var dbContext= new EmployeeEntities())
+                {
+                     var query = (from Emp in dbContext.EMPLOYEEs.Where(x=>x.EmployeeId == Id))
+                                    select new Employee { EmployeeName = Emp.EmployeeName, EmployeeCode = Emp.EmployeeCode, Salary = EMp.Salary};
+                    return query.ToList();
+                }
+            }
+
+            public void UpdateEmployee(Employee employee)
+            {
+                using(var dbContext= new EmployeeEntities())
+                {
+                    Employee empUpdate = dbContext.EMPLOYEEs.Where(x=>x.EmployeeId == Employee.EmployeeCode).SingleorDefault();
+                    empUpdate.EmployeeName = employee.EmployeeName;
+                    empUpdate.EmployeeId = employee.EmployeeCode;
+                    empUpdate.Salary = employee.Salary;
+                    dbContext.SaveChanges();
+                }
+            }
+
+
+        }
+    }
+
+    =================================================================================================
+    WebAPI Controller :
+
+    1. >>>>>>>>>
+    Main project > WebApiTest>ValuesController
+
+    pubilc class value controller : Api Controllers
+    {
+        IEmployeeBL iEmployeeBL = new IEmployeeBL();
+
+        // Get One
+        // Get api/values?Id=1
+        public IList<Employee> Get(string id)
+        {
+            return iEmployeeBL.GetEmployeeById(id);
+        }
+
+        // Get List
+        // Get api/values
+        public IList<Employee> Get()
+        {
+            return iEmployeeBL.GetEmployeeList();
+        }
+
+        //Add
+        /// Get api/values   (Post)
+        //public void PostEmployee()
+        {
+            iEmployeeBL.AddEmployee(new Employee{EmployeeCode=1,EmployeeName="xyz", Salary="45000"});
+        }
+
+        //Update
+        ///Get api/values   (Put)
+        public void Put()
+        {
+            iEmployeeBL.UpdateEmployee(new Employee{EmployeeCode =02, EmployeeName = "abc", Salary ="48000"});
+        }
+
+        //Delete
+        // Get api/values  (Delete)
+
+         public void Delete(int id)
+        {
+            iEmployeeBL.DeleteEmployee(id);
+        }
+    }
+
+    >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+    // https://docs.microsoft.com/en-us/aspnet/web-api/overview/odata-support-in-aspnet-web-api/odata-v4/create-an-odata-v4-endpoint
+
+    1. What is OData  ()
+        The Open Data (OData) Protocol is a data access protocol for the web.
+        OData provides a uniform way to structure data, query the data,
+        and manipulate the data using CRUD operations (Create, Read, Update and Delete). OData supports both AtomPub (XML) and JSON formats.
+        OData also defines a way to expose metadata about the data. Clients can use the metadata to discover the type information and relationships for the data set.
+
+    1.1 Why Odata with Web API?
+        This is the little misconception, Odata is not tightly coupled with the Web API or MVC.
+        As we know, it's nothing but a protocol, so any service based application may follow this protocol.
+        We can create a pretty cool WCF data service by maintaining the Odata protocol.
+        So, it's not like that, Odata will only work with MVC or the Web API.
+    2. The Open Data Protocol(OData) is a data access protocol build on core protocols like HTTP and Commanly accepted methodlogy like Rest for the Web.
+    3. What is OData Query Option
+
+    4. When we call API methods we can pass query string to the api call to do various things on service side like
+
+    Filter
+    Order
+    Skip
+    Top Etc
+
+    Create OData Query Options
+
+    In this We will explian how we can use  OData Capabilities in ASP.NET Web Api
+    What OData is and will  also create OData enable Restful servces.
+    The Following are the OData query Options that Asp.Net Web Api can leverage.
+    $order by : Sorts the record in particular order like ascending and descending.
+    $select: Slected the column or properties in the result set.
+    $skip : Used to s kip the number of records or result.
+    $Top : Fetches only top n records. For e.g I want to fetch top 10 record from the database, then my particular service should be OData enable to support $top
+           Query option.
+    $expand : Expand the entities of the fetched collection.
+    $Filter : Filter the result set based on certain criteria.it is similar to where clause of LINQ.
+    $inline count : This Query option is mostly used for pagination.
+
+
+
+namespace WebApiTest
+public static class WebApiConfig
+{
+    public static void Register(HttpConfiguration config)
+    { 
+        config.MapHttpAttributeRoutes();
+
+        config.Routes.MapHttpRoute(
+            name: "DefaultApi",
+            routeTemplate: "api/{controller}/{id}",
+            defaults: new { id = RouteParameter.Optional}
+        ); 
+        // configure additional webapi and Services settings here.
+           config.EnableQuerySuport();
+    }
+}
+
+Final Odata implementation : 
+1.Add Mangemuget Manager : microsoft.aspnet.Webapi.Odata
+                         : Microsoft.Data.OData. 
+2. WebApiConfig.cs
+            // Web API configuration and services.
+            config.AddODataQueryFilter();
+3.[EnableQuery]  ....// Add in controller Method.
+4. https://localhost:44350/api/Employees1?$skip=1
+
+010112345

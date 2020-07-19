@@ -1,0 +1,803 @@
+
+Ablum.Cs
+
+namespace Webaplication.Model
+
+Public Class Album
+{
+    public int AlbumId {get; set;}
+    public string Tittle {get; set; }
+    public decimal Price {get; set;}
+}
+
+public Class MusicCOntext : DbContext
+{
+    public DbSet<Album> Album {get; set;}
+}
+// ================================================================================
+// How Does EF connect to your db
+// 1. Could be cloud, App_Data, Intranet, Internet, Other Folder.
+
+// connect string name in DbContext Class
+
+// Code :=
+// MusicStoreConnection is database connection name ;
+// helpingshandDB = Database name of sql server
+public MusicCOntext() : base("MusicStoreConnection")
+{
+
+}
+
+<connectionStrings>
+ <add name="MusicStoreConnection" connectionString="Data Source=RAKESH\SQLEXPRESS;Initial Catalog=helpingshandDB;Integrated Security=True"
+       providerName="System.Data.SqlClient" />
+</connectionStrings>
+
+// Note : Glimpse used for advance Debug method in our browser.
+
+// ================================================================================
+
+public class Artist {
+    public int Artist Id  {get; set; }
+    public string Name {get; set}
+    public sting Bio {get; set;}
+}
+// Code First class
+
+//  ==================================================================================
+// Create Classes
+// Table Creation :
+
+// 1. Table Attribute
+//  - Schema
+//  -Name
+
+// 2. Colum Attribute
+//  - Name
+
+3.String
+ . Nullable  navarchar(max) is default
+
+ 3.1Attribute
+ 3.1.1. StringLenthAttribute
+       .Maxlength Attribute
+       .Minlength Attribute
+ 3.1.2.Requuired Attribute
+
+4. Number
+  Sql Data Type Mapped to .Net data Type
+   - long become Bigint
+
+ Range Attributes
+  -maximum
+  -minimum
+
+==================================================================================================
+Demo :
+Attribes and Database control :
+
+WebApplication : MusicStore
+
+
+1. Model
+
+  1.1 Artist :
+        public class Artist
+        {
+            public int ArtistId {get;set;}
+
+            [Required()]   // use DataAnnotation
+            [StringLenth(100,Minimumlength=2]
+            public string name {get; set;}
+        }
+ >Model>MusicStoreDatacontext
+ 1.1 MusicStoreDatacontext (Model) :
+        Public class MusicStoreDatacontext  : DbContext
+        {
+            Public Dbset<Artist> Artist {get; set;}
+        }
+
+2. Controller :
+  2.1 Artist controller MusicStoreDatacontext
+      public class ArtistController  : Controller
+      {
+          MusicStoreDatacontext context = new MusicStoreDatacontext();
+
+          // Get Artist
+
+         public ActionResult Index()
+         {
+             return View(Context.Artist.Tolist());
+         }  s
+         public ActionResult Create(Artist artist)
+         {
+             if(!ModelState.IsValid) return View(artist);
+             Context.Artist.Add(artist);
+             Context.SaveChanges();
+             return RedirectToAction("Index");
+         }
+      }
+
+Note : When you are update modele attributs then must have to update Migration of SQL Database.
+      > Go to Package Manager Console >
+      > Enable-Migration   //Error
+      > Enable-Migration-EnableAutimaticMigration
+      > Update database -Script
+      > Update database -Script -Force    //Error
+      > Update database  -Force
+
+      > During the Migration time automatic Create Migration Model (Included migrated table name and DBContext Name , Configartion File)
+
+
+==================================================================================================
+Demo :
+
+Creating the DBContext :
+
+Notes : Find Method :
+   1. Regardless of the day data Type You're going to need to look the object up by its key.
+   2. ReWriting that code over and over again becomes tedious
+   3. The Find method will do that for you
+   4. Accept the parameter thats maps to the key
+   5. Return the object if its found.
+   6. Return null if its not found
+
+>Model>Repository>Repository.cs
+{
+    public class Repository<T> Where T : class
+    {
+        private MusicStoreDatacontext context= new MusicStoreDatacontext();
+
+        protected DbSet<T> DbSet {get; set;}
+
+        public Repository()
+        {
+            DbSet = Context.Set<T>();
+        }
+
+        Public List<T> GetAll()
+        {
+            return DbSet.Tolist();
+        }
+
+        public T Get(int id)
+        {
+            return DbSet.Find(id);
+        }
+
+        public void Add (T entity)
+        {
+            DbSet.Add(entity);
+        }
+
+        public void Savechanges()
+        {
+            context.Savechanges();
+        }
+
+    }
+}
+
+
+
+>Model>Repository>ArtistRepository.cs
+
+public class ArtistRepository : Repository<Artist>
+{
+public List<Artist> GetName (String Name)
+ {
+     return DbSet.Where(a=>a.Name.Contains(name)).ToList();
+ }
+}
+
+
+2. Controller :
+  2.1 Artist controller MusicStoreDatacontext
+      public class ArtistController  : Controller
+      {
+          //MusicStoreDatacontext context = new MusicStoreDatacontext();
+            ArtistRepository Repository = new ArtistRepository();
+          // Get Artist
+
+         public ActionResult Index()
+         {
+             //return View(Context.Artist.Tolist());
+               return View(Repository.GetAll());
+         }
+
+         public ActionResult Create()
+         {
+
+         }
+            [httpPost]
+         public ActionResult Create(Artist artist)
+         {
+             if(!ModelState.IsValid) return View(artist);
+            // Context.Artist.Add(artist);
+             Repository.Add(artist);
+             //Context.SaveChanges();
+             Repository.Savachanges();
+             return RedirectToAction("Index");
+         }
+      }
+
+
+// ==================================================================================
+      Initializing Database
+
+      'Testing requires a know Starting Sates"
+
+    1. Create class that inherits from the appropriate option
+        1.Create Database If not exits.
+        2.DropCreateDatabaseWhenModelChange
+        3.DropCreateDatabaseAlways
+
+
+    2. override the seed method to create database content
+    3. register the method with database.Seltnitializer
+
+>>>>>>>>>>>>
+    >Model>Repository>Repository.cs
+
+    public class Repository<T> Where T : class
+    {
+        private MusicStoreDatacontext context = null;
+
+        protected DbSet<T> DbSet {get; set;}
+
+        public Repository( MusicStoreDatacontext context )
+        {
+            DbSet = Context.Set<T>();
+            context = new MusicStoreDatacontext();
+        }
+
+        Public List<T> GetAll()
+        {
+            return DbSet.Tolist();
+        }
+
+        public T Get(int id)
+        {
+            return DbSet.Find(id);
+        }
+
+        public void Add (T entity)
+        {
+            Db.Add(entity);
+        }
+
+        public void Savechanges()
+        {
+            context.Savechanges();
+        }
+
+    }
+
+>>>>>>>>>>>>>>>>
+    >Model>Repository>MusicStoreDatacontextInitializer.cs
+
+    public class MusicStoreDatacontextInitializer : DropCreateDatabaseAlways<musicStoreDataContext>
+    {
+        Artist artist = new Artist() { Name = "First Artist"};
+        contex.Artists.Add(artist);
+        context.Artist.Add(new Artist(){ Name = "Second Artist"})
+        context.SaveChanges();
+    }
+
+>>>>>>>>>>>>>>
+> Global.asax.cs
+public class MvcApplication : System.Web.HttpApplication
+
+Protected void Application_start()
+{
+    Databse.Setlnitializer<musicStoreDataContext>(new MusicStoreDataContextInitializer())
+}
+
+
+// ==================================================================================
+One To many Relationship
+
+what have we seen so far
+
+1."its just Work" - John Galloway
+2. Basic step
+  2.1 Create a class
+  2.2 Add Properties
+  2.3 Decorate with attributes a needed
+
+
+Class Design
+                                           2. ArtistId
+    1.ALbum                                      2.1 Name
+        1.1 Tittle                               2.2 Bio
+        1.2 ReleaseYears
+>>>>>>>>>>>>>>>
+Demo :
+
+>Model>Album.cs
+
+public class Album.cs
+{
+  public int AlbumId {get; set;}
+
+  [Required()]
+  [StringLength(100,MinimumLength = 2)]
+
+  public String Tittle {get; set;}
+
+  public Artist Artist {get; set;}
+
+}
+
+
+
+>Model>Artist.cs
+public class Artist.cs
+{
+  public int ArtistId {get; set;}
+
+  [Required()]
+  [StringLength(100,MinimumLength = 2)]
+
+  public String Name {get; set;}
+
+  public List<Album> Albums {get; set;}
+
+}
+
+
+>Package Manager Console > Update Database
+
+
+ >Model>MusicStoreDatacontext
+
+    Public class MusicStoreDatacontext  : DbContext
+    {
+        Public Dbset<Artist> Artist {get; set;}
+        Public Dbset<Album> Albums {get; set;}
+
+    }
+>>>>>>>>>>>>>>>>
+>Model>Repository>MusicStoreDatacontextInitializer.cs
+
+    public class MusicStoreDatacontextInitializer : DropCreateDatabaseAlways<musicStoreDataContext>
+    {
+        Artist artist = new Artist() { Name = "First Artist Hritik Roshan"} ;
+        contex.Artists.Add(artist);
+
+        // Add Albums in Artist  (1st way)
+        context.Albums.Add(new Album(){Aritst = artist, Tittle = "First Album Koi mil gaya"})
+        context.Albums.Add(new Album(){Aritst = artist, Tittle = "Second Album Krish3 "})
+
+
+        // Add Albums in Artist  (2nd way)
+        context.Albums.Add(new Album(){ artist = context.Artist.Add(new Artist(){ Name = "Second Artist sushant singh"}),
+                                                                                  Tittle = "Third Album" });
+
+        context.SaveChanges();
+    }
+    This is not right time to maintaine
+
+      AlbumId  Tittle                         Artist_ArtistID
+1               First Album Koi mil gaya          1
+2       2       Second Album Krish3               1
+3       3       Third Album                       2
+
+
+ 
+
+2. Controller :
+  2.1 Artist controller MusicStoreDatacontext
+      public class ArtistController  : Controller
+      {
+          //MusicStoreDatacontext context = new MusicStoreDatacontext();
+            ArtistRepository Repository = new ArtistRepository();
+          // Get Artist
+
+         public ActionResult Index()
+         {
+             //return View(Context.Artist.Tolist());
+               return View(Repository.GetAll());
+         }
+
+         public ActionResult Create()
+         {
+
+         }
+        public ActionResult Details (int id )     // Code is here
+        {
+            Artist artist = Repository.Get(id);
+            if(artist = null
+            {
+                return httpBotFound()
+            }else{
+                return view(artist);
+            }
+        }
+
+            [httpPost]
+         public ActionResult Create(Artist artist)
+         {
+             if(!ModelState.IsValid) return View(artist);
+            // Context.Artist.Add(artist);
+             Repository.Add(artist);
+             //Context.SaveChanges();
+             Repository.Savachanges();
+             return RedirectToAction("Index");
+         }
+      }
+
+3. View :
+    <div>
+    <ul>
+        @foreach(var album in Model.Album)
+        <li>@album.Title<li>
+    </ul>
+    </div>
+
+Note : Object Reference not send to an instant of an object. 
+      Tittel : stirng 
+      ReleaseYears : int
+      Artist : Artist
+
+      Album album = context.Find(42);
+      Console.WriteLine(album.Tittle);
+    
+    1.Console.WriteLine(album.Artist.Name);
+
+    1. When Album is loaded, all of the simple data type are retrived.
+    2. A Strub is placed into all of the complex data type.
+       . This stub contains the logic to have its data loaded when its first used.
+    3.When a property or method is callled from the complex type, the request is then made to load the data.
+    4. Mainly "objectvalue = null" then it shows errors.
+
+
+// ==================================================================================
+
+Diffrent between procate and protected : 
+public : can be acess any where.
+private : cannot excess outside any class (Like object and inheritance) not work
+Protected : cannot use same class object in other class (Access only member not value)
+
+class A
+{
+    protected int x = 123;
+}
+
+class B : A
+{
+    static void Main()
+    {
+        var a = new A();
+        var b = new B();
+
+        // Error CS1540, because x can only be accessed by
+        // classes derived from A.
+        // a.x = 10;     //canonot used object of other class only same class object you can use.
+
+        // OK, because this class derives from A.
+        b.x = 10;
+    }
+}
+//  =========================================================================================
+
+difference between ref & out parameters
+  An argument passed as ref must be initialized before passing to the method whereas out parameter needs not to be initialized before passing to a method.
+  
+//  =========================================================================================
+What is serialization
+   convert the object into a stream of bytes.
+
+ Can we use "this" command within a static method
+    We can't use 'This' in a static method because we can only use static variables/methods in a static method.
+
+// What is the difference between constants and read-only
+  Constant variables are declared and initialized at compile time. The value can't be changed afterward. other Method is know as constant.
+  Read-only is used only when we want to assign the value at run time.  Main Method is(){} is know as runtime method.
+   
+//What is an interface class 
+// An Interface is an abstract class which has only public abstract methods, and the methods only have the declaration and not the definition.
+ These abstract methods must be implemented in the inherited classes.
+
+// What are Custom Control and User Control
+  Custom Controller is kown as Dll File of the project .
+  User Controller is known as Our Default controller.
+
+//What is the difference between Array and Arraylist
+ In an array, we can have items of the same type only. The size of the array is fixed when compared. 
+ To an arraylist is similar to an array, but it doesn't have a fixed size.
+
+//Can a private virtual method can be overridden
+ No, because they are not accessible outside the class.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ Skip to content
+Search or jump to…
+
+Pull requests
+Issues
+Marketplace
+Explore
+ 
+@kevatrakesh8 
+Learn Git and GitHub without any code!
+Using the Hello World guide, you’ll start a branch, write comments, and open a pull request.
+
+
+kevatrakesh8
+/
+ms-sql
+1
+00
+Code
+Issues
+Pull requests
+Actions
+Projects
+Wiki
+Security
+Insights
+Settings
+ms-sql/NareshTeacher.sql
+@kevatrakesh8
+kevatrakesh8 Update NareshTeacher.sql
+Latest commit 2151516 on Apr 9
+ History
+ 1 contributor
+221 lines (174 sloc)  8.97 KB
+  
+--1.----Create new login Id and Password for user (CUI => Create user id ) -------
+    --whatever database user will create then only he can access that all database 
+   create login rakesh with password ='1234'  
+   -- Go and cheack in "Security>Login>abc "it will be created.
+   ---- Close application=>Open Again>Server name :Rakesh/SQLExpress
+			--						Authenfication : SQL Server Authetification
+			--						Login : rakesh
+			--						Password :1234
+
+--2. How to create a new Database in SQL Server Using "CUI" and "GUI" 
+ create database MyClassDB    
+ ddl _ data definition language
+ dml _ data manipulation language
+ dql _ data query language
+ dcl _ data control language..
+ TCL _ transaction control language.
+
+--working with Sub-Language of SQL (DDL,DML,DQL,TCL,DCL Command)
+--Part A =>  "DDL" *data definition language *  (Crete,Alter,SP_rename,Turncate, & Drop Column)-----------------
+     --Crete table :
+		--1.Crete Database
+		create database xaller		
+		--2. Create a simple table 
+		create table Employee_details(id int,fname varchar(50),Lastname varchar(50),salary int)	
+				-- Go to database 
+				use xaller	
+			   --3. Show Structure of Table
+				 sp_help Employee_details
+
+	----Alter command  for column activity
+	--   Alter -Alter Column 
+	--   Alter -Add
+	--   SP_Rename
+	--   Alter-Drop Column
+
+				-- Change datatype and size of column
+				alter table Employee_details alter Column fname Varchar(100)
+
+				-- AddColumn
+				alter table Employee_details Add Address Varchar(500)
+
+				-- SP_Rename table Column .
+				Sp_RENAME 'Employee_details.fname','FirstName'
+				-- Drop Column--
+				alter table Employee_details Drop Column Address
+				alter table Employee_details Drop Column [Employee_details.MyAddress]
+
+	--Truncate Table: Delete all rows data form table    
+				 Truncate table Employee_details 
+	
+	-- Drop Table:Drop the table with data     
+				 Drop table Employee_details  
+				 select * from Employee_details
+
+
+--Part B=>  --DML (Data manupulation command ) => inset,Update,Delete-----------
+				 create table Employee_details(id int, fname varchar(100), lastName varchar(200), salay int)
+
+			-- insert data in Table 
+			   --method I
+			   insert into Employee_details values(4,'shubham','Vishwakrma',250000)
+			   -- method II
+			   insert into Employee_details(id,fname,salary) values(4,'shubham',500000)
+ 
+			--update date in table
+			   update Employee_details set fname='suaman' where id = 2;
+			   update Employee_details set lastName= null where id = 3; 
+			   update Employee_details set lastName= 'singh' where lastName is null;
+
+			-- Delete data in table
+			   Delete from Employee_details where salary=250000;
+			   Delete from Employee_details where fname='rakesh' and salary = 10000;
+			   Delete from Employee_details where fname='Prashant' or salary = 200000;  -- both condition data will be deleted.
+			   select * from Employee_details
+
+--Part C=>  --DQL/DRL (Data /QueryRead command ) => Select-----------
+			insert into Employee_Details values (1,'rakesh','kevat',5000);
+			insert into Employee_Details values(2,'prashant','Mishra',10000);
+			insert into Employee_Details values (3,'Shravan','Singh',25000);
+			insert into Employee_Details values (4,'shubham','Mishra',30000);
+
+			Select * from Employee_details;
+			select * from Employee_details where lastName = 'kevat';
+			Select fname,lastName,salary from Employee_details;
+			Select fname,lastName,salary from Employee_details where fname='rakesh';
+
+--Part D=>  --Identiy (1,1)
+         -- identity(1,1)       --Values ID--1,2,3,4,5,......
+		Create table Student_details (id int identity, ename varchar(500),lname varchar(600),salary int)
+		insert into Student_details values ('rakesh','kevat',12000);
+		insert into Student_details values ('rakesh','kevat',12000),('Subham','Mishra',24000);
+		insert into Student_details (ename,lname,salary) values ('rakesh','kevat',12000);
+		Select * from Student_details;     
+		-- identity(100,5)  -- Values if Id--100,105,110,115,120,125,...
+		Create table Student_details1 (id int identity(100,5), ename varchar(500),lname varchar(600),salary int)
+		insert into Student_details1 values ('rakesh','kevat',12000);
+		insert into Student_details1 values ('rakesh','kevat',12000),('Subham','Mishra',24000);
+		insert into Student_details1 (ename,lname,salary) values ('rakesh','kevat',12000);
+		Select * from Student_details1;
+		-- insert the identity in already created table,		
+		Create table Student_details2 (id int identity, ename varchar(500),lname varchar(600),salary int)
+		insert into Student_details2 (ename,lname,salary) values ('rakesh','kevat',5000);
+		Select * from Student_details2;
+		set identity_insert Student_details2 OFF
+		insert into Student_details2 (ename,lname,salary) values ('rakesh','kevat',5000);
+		set identity_insert Student_details2 ON
+
+		
+
+
+-- Set Opetrator --
+			Create table Employee_Mumbai (id int,Ename varchar(100), salary int)
+			Create table Employee_Delhi (id int,Ename varchar(100), salary int)
+			select * from Employee_Mumbai
+			union
+			select * from Employee_Delhi
+
+			select * from Employee_Mumbai
+			union all 
+			select * from Employee_Delhi	
+
+			select * from Employee_Mumbai
+			intersect
+			select * from Employee_Delhi	
+
+			select * from Employee_Mumbai
+			except
+			select * from Employee_Delhi
+
+-- Add Primary key in table 
+            create table registration_question ( question_id int not null  primary key  identity (1,1), question_ask varchar(200))
+
+-- Add Primary key in existing table 
+            ALTER TABLE registration_question ADD PRIMARY KEY (question_id);
+--Primary key and foreign key
+-- child foreign class id must be available in parent class.
+			 -- Add primary key it table
+			 Create table it (id int primary key, fname varchar(100), designation varchar(100));
+			 insert into it values (1,'rakesh','information');
+			 insert into it values (2,'raejesh','network'),(3,'suraj','account');
+			 select * from it
+			 --Add foreign key in emplyoee table
+			create table employee(empid int, Ename varchar(100), salary int,
+								  id int foreign key references it(id))  --child table
+			--way of insert data in child "Employe" Table
+			insert into employee values(10,'rakesh',40000,1),(11,'rajesh',10000,2);
+			insert into employee values(10,'rakesh',40000,3);
+		    insert into employee values(10,'rakesh',40000,4)  -- not allowed > 3 id not available in “it” table.
+			select * from employee;
+			select * from it;
+			
+-------------------------------------------------------------------------------------------------------------
+
+--Joint of table  
+Create table student(student_id int primary key identity (1,1),student_name varchar(50),student_mail varchar(50)) 
+Create table course (course_id int primary key identity (1,1),course_name varchar(50),course_fees int,student_id int ) 
+Create table mysubject (mysubject_id int primary key identity (1,1), mysubject_name varchar(50),course_id int) 
+insert into student values ('raj','raj@gmail.com'),('Prashant','Prashant@gmail.com'),('rakesh','rakesh@gmail.com');
+insert into course values ('Science',20000,1),('Commerce',7500,2),('Arts',1300,3);
+insert into mysubject values('dotnet',1),('php',1),('python',1),('Testing',1)
+insert into mysubject values('ECO',2),('Account',2),('Sp',2),('Maths',2)
+insert into mysubject values('hand',3),('cotton',3),('drg',3),('craft',3)
+
+select * from student
+select * from course	
+select * from mysubject
+
+--drop table student
+--drop table course
+--drop table mysubject
+
+-- join Two table  (Student and course)> with help of create object.
+--inner join 
+select student_name, student_mail, course_name from student obj_s inner join course obj_c on obj_s.student_id = obj_c.student_id;
+select * from student obj_s inner join course obj_c on obj_s.student_id = obj_c.student_id;
+
+-- full outer join
+select student_name, student_mail, course_name from student obj_s full outer join course obj_c on obj_s.student_id = obj_c.student_id;
+select * from student obj_s full outer join course obj_c on obj_s.student_id = obj_c.student_id;
+
+
+
+----------------Select from to below Top 3 fees amount by using store procedure  ---------------------
+declare @result int 
+select top 2 @result = fees from Student_details order by fees desc
+print @result
+
+select * from Student_details
+
+
+-------------- Procedure in table ----------------------
+CREATE PROCEDURE GetProductDe
+AS
+BEGIN 
+select * from student 
+END
+
+exec GetProductDe
+
+---------------------------------------------------------------------------
+
+ create procedure my 
+ @student_id int
+ as
+ begin  
+select * from student
+ end 
+
+ exec my
+
+ ---------------------------------------------------------------------------
+
+-- how to take backupd of table or copy the same table.
+
+  use RealEstateDB
+ 
+ select * from property
+
+ select * into dbo.Employee_Backup_tbl from property   -- same database table backup file.
+
+ select * into RegistrationDb.dbo.mydata_backup from property     -- table send to another database backup
+© 2020 GitHub, Inc.
+Terms
+Privacy
+Security
+Status
+Help
+Contact GitHub
+Pricing
+API
+Training
+Blog
+About
